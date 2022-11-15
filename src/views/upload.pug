@@ -1,0 +1,10 @@
+extends base.pug
+
+block content
+  form(method="POST")
+    input(name="title", placeholder="Write the title", required)
+    input(name="rating", placeholder="Write the rating", required)
+    input(name="comments", placeholder="Write the comments", required)
+    input(name="views", placeholder="Write the views", required)
+    input(name="id", placeholder="Write the id", required)
+    input(value= "upload", type ="submit")
