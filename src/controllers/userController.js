@@ -117,10 +117,71 @@ export const finishGithubLogin = async (req, res) => {
   }
 };
 
-export const edit = (req, res) => res.send("Edit");
+export const getEdit = (req, res) => {
+  return res.render("edit-profile", {pageTitle: "Edit Profile"});
+};
+
+export const postEdit = async (req, res) => {
+  const {_id, avatarUrl} = req.session.user;
+  const {sessionemail, name, sessionusername, location} = req.body;
+  const {file} = req;
+  const exists = await User.exists({$or: [{sessionemail}, {sessionusername}]});
+  const user = await User.findById(_id);
+
+
+  if(exists && user.email != sessionemail && user.username != sessionusername)
+    return res.status(400).render("edit-profile", {pageTitle: "Edit Profile", errorMessage: "This email/username is already taken."});
+  const updatedUser = await User.findByIdAndUpdate(_id, {
+    avatarUrl: file ? file.path : avatarUrl,
+    name: name,
+    email: sessionemail, 
+    username: sessionusername, 
+    location: location
+  }, {new: true});
+  req.session.user = updatedUser;
+  return res.redirect("/users/edit");
+};
 
 export const logout = (req, res) => {
   req.session.destroy();
   return res.redirect("/");
 };
-export const see = (req, res) => res.send("See");
+
+export const getChanggePassword = (req, res) => {
+  if(req.session.user.socialOnly == true){
+    return res.redirect("/");
+  }
+  return res.render("change-password", {pageTitle: "Change Password"});
+};
+
+export const postChanggePassword = async (req, res) => {
+  const {
+    session: {
+      user: { _id },
+    },
+    body: { oldPassword, newPassword, newPasswordConfirmation },
+  } = req;
+  const user = await User.findById(_id);
+  const ok = await bcrypt.compare(oldPassword, user.password);
+  if(!ok){
+    return res.status(400).render("change-password", {pageTitle: "Change Password", errorMessage: "The current password is incorect."});
+  }
+  if(newPassword != newPasswordConfirmation){
+    return res.status(400).render("change-password", {pageTitle: "Change Password", errorMessage: "The password does not match."});
+  }
+  
+  
+  user.password = newPassword;
+  await user.save();
+  return res.redirect("/users/logout");
+};
+
+export const see = async (req, res) => {
+  const {id} = req.params;
+  const user = await User.findById(id).populate("videos");
+  if(!user){
+    return res.status(400).render("404", {pageTitle: "User not found"});
+  }
+
+  return res.render("profile", {pageTitle: `${user.name}'s Profile`, user});
+};
