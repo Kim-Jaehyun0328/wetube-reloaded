@@ -7,7 +7,8 @@ const videoRouter = express.Router();
 videoRouter.get("/:id([0-9a-f]{24})", watch);
 videoRouter.route("/:id([0-9a-f]{24})/edit").all(protectorMiddleware).get(getEdit).post(postEdit);
 videoRouter.route("/:id([0-9a-f]{24})/delete").all(protectorMiddleware).get(deleteVideo)
-videoRouter.route("/upload").get(getUpload).all(protectorMiddleware).post(uploadVideo.single("video"), postUpload);
+videoRouter.route("/upload").all(protectorMiddleware).get(getUpload).post(uploadVideo.fields(
+  [{name: "video", maxCount:2},{name:"thumb", maxCount:2}]), postUpload);
 
 
 export default videoRouter;

@@ -8,7 +8,7 @@ block content
             span 😀
         else
             if user.avatarUrl[0]=="h"
-                img.header__avatar(src=user.avatarUrl)
+                img.header__avatar(src=loggedInUser.avatarUrl,crossorigin)
             else 
                 img.header__avatar(src="/" + user.avatarUrl)
         h3=user.name

@@ -143,16 +143,19 @@ export const postEdit = async (req, res) => {
     location: location
   }, {new: true});
   req.session.user = updatedUser;
-  return res.redirect("/users/edit");
+  return res.redirect("/");
 };
 
 export const logout = (req, res) => {
-  req.session.destroy();
+  req.flash("info", "Bye");
+  req.session.user = false;
+  req.session.loggedIn = false;
   return res.redirect("/");
 };
 
 export const getChangePassword = (req, res) => {
   if(req.session.user.socialOnly == true){
+    req.flash("error", "Can not change password");
     return res.redirect("/");
   }
   return res.render("change-password", {pageTitle: "Change Password"});
@@ -177,6 +180,7 @@ export const postChangePassword = async (req, res) => {
   
   user.password = newPassword;
   await user.save();
+  req.flash("info", "Password updated");
   return res.redirect("/users/logout");
 };
 
@@ -192,6 +196,5 @@ export const see = async (req, res) => {
   if(!user){
     return res.status(400).render("404", {pageTitle: "User not found"});
   }
-
   return res.render("profile", {pageTitle: `${user.name}'s Profile`, user});
 };

@@ -19,7 +19,7 @@ header
                             span 😀
                         else
                             if loggedInUser.avatarUrl[0]=="h"
-                                img.header__avatar(src=loggedInUser.avatarUrl)
+                                img.header__avatar(src=loggedInUser.avatarUrl,crossorigin)
                             else 
                                 img.header__avatar(src="/" + loggedInUser.avatarUrl)
                         
