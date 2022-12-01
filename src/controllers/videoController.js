@@ -1,6 +1,7 @@
 import Video from "../models/Video";
 import User from "../models/User";
 import Comment from "../models/Comment";
+import { async } from "regenerator-runtime";
 
 
 export const home = async (req, res) => {
@@ -16,8 +17,6 @@ export const home = async (req, res) => {
 export const watch = async (req, res) => {
   const {id} = req.params;
   const video = await Video.findById(id).populate("owner").populate("comments");
-  console.log(video);
-  console.log(video.comments.text);
   if(video==null)
     return res.status(404).render("404", {pageTitle: "Video not found"});
   return res.render("watch", {pageTitle: video.title, video});
@@ -145,9 +144,26 @@ export const createComment = async (req, res) => {
   video.comments.push(comment._id);
   await video.save();
 
+
+  const commentUser = await User.findById(user._id).populate("comments");
+  commentUser.comments.push(comment._id);
+  await commentUser.save();
+
   res.status(201).json({newCommentId: comment._id});
 };
 
-export const deleteComment = () => {
-  return res.end();
+export const deleteComment = async (req, res) => {
+  const {commentId} = req.body;
+  const comment = await Comment.findById(commentId).populate("owner").populate("video");
+  const user = await User.findById(comment.owner._id);
+  const video = await Video.findById(comment.video._id);
+
+  user.comments.pop(commentId);
+  video.comments.pop(commentId);
+  await user.save();
+  await video.save();
+
+  await Comment.findByIdAndDelete(commentId);
+
+  return res.sendStatus(200);
 };
