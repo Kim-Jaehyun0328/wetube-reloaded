@@ -9,6 +9,7 @@ const userSchema = mongoose.Schema({
   password: {type: String, required: false},
   name: {type: String, required: true},
   location: String,
+  comments: [{type: mongoose.Schema.ObjectId, required: true, ref: "Comment"}],
   videos: [{type: mongoose.Schema.Types.ObjectId, ref: "Video"}],
 });
 

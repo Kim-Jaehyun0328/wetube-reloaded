@@ -148,7 +148,7 @@ export const postEdit = async (req, res) => {
 
 export const logout = (req, res) => {
   req.flash("info", "Bye");
-  req.session.user = false;
+  req.session.user = null;
   req.session.loggedIn = false;
   return res.redirect("/");
 };
